@@ -2,16 +2,59 @@ import Event from "../models/Event.js";
 
 export const createEvent = async (req, res) => {
   try {
-    const event = new Event(req.body);
-    await event.save();
+    const {
+      title,
+      description,
+      category,
+      status,
+      startDate,
+      endDate,
+      ...otherFields
+    } = req.body;
 
-    res.status(201).json({
+    // Required field check
+    if (!title || !description || !category || !status) {
+      return res.status(400).json({
+        error:true,
+        success: false,
+        message: "Required fields missing"
+        
+      });
+    }
+
+    // Date logic
+    let eventDate = null;
+
+    if (startDate && endDate) {
+      eventDate = `${startDate} to ${endDate}`;
+    } else if (startDate) {
+      eventDate = startDate;
+    } else if (endDate) {
+      eventDate = endDate;
+    }
+
+    const event = await Event.create({
+      title,
+      description,
+      category,
+      status,
+      date: eventDate,
+      ...otherFields
+    });
+
+    return res.status(201).json({
+      error: false,
+      success: true,
       message: "Event created successfully",
-      event
+      data : event
     });
 
   } catch (error) {
-    res.status(500).json({ message: "Server error" });
+    return res.status(500).json({
+      error: true,
+      success: false,
+      message: error.message
+    });
   }
 };
 

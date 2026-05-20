@@ -17,6 +17,8 @@ export const registerUser = async (req, res) => {
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({
+        error:true,
+        success:false,
         message: "User already exists"
       });
     }
@@ -32,14 +34,22 @@ export const registerUser = async (req, res) => {
     await user.save();
 
     res.status(201).json({
-      message: "User registered successfully"
+      error:false,
+      success:true,
+      message: "User registered successfully",
+      data:{
+        id: user._id,
+        email:user.email,
+        role:user.role
+      }
     });
 
   } catch (error) {
     console.log("ERROR:", error);
     res.status(500).json({
-      message: "Server error",
-      error: error.message
+      error:true,
+      success:false,
+      message: error.message
     });
   }
 };
@@ -51,13 +61,21 @@ export const loginUser = async (req, res) => {
 
     const user = await User.findOne({ email });
     if (!user) {
-      return res.status(400).json({ message: "User not found" });
+      return res.status(400).json({ 
+        error:true,
+        success:false,
+        message: "User not found" 
+      });
     }
 
     // Compare password
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return res.status(400).json({ message: "Invalid password" });
+      return res.status(400).json({ 
+        error:true,
+        success:false,
+        message: "Invalid password" 
+      });
     }
 
     // JWT Token
@@ -68,8 +86,15 @@ export const loginUser = async (req, res) => {
     );
 
     res.json({
+      error:false,
+      success:true,
       message: "Login successful",
-      token
+      token,
+      user:{
+        id : user._id,
+        email: user.email,
+        role:user.role
+      }
     });
 
   } catch (error) {

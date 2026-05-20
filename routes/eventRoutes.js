@@ -15,12 +15,12 @@ import {
 const router = express.Router();
 
 // Admin protected
-router.post("/", authMiddleware, createEvent);
-router.put("/:id", authMiddleware, updateEvent);
-router.delete("/:id", authMiddleware, deleteEvent);
+router.post("/create", authMiddleware, createEvent);
+router.put("/update/:id", authMiddleware, updateEvent);
+router.delete("/delete/:id", authMiddleware, deleteEvent);
 
 // Public
-router.get("/", getEvents);
-router.get("/:id", getEventById);
+router.get("/get", getEvents);
+router.get("/get/:id", getEventById);
 
 export default router;

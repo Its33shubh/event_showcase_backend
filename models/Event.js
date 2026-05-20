@@ -27,24 +27,28 @@ const eventSchema = new mongoose.Schema(
     },
 
     date: {
-      type: Date,
-      required: true
+      type: mongoose.Schema.Types.Mixed,
+      default: null
     },
 
     time: {
       type: String,
-      required: true
+      default:""
     },
 
     location: {
       type: String,
-      required: true,
+      default:"",
+      trim: true
+    },
+    host_venue: {
+      type: String,
       trim: true
     },
 
     image: {
       type: String,
-      required: true
+      default:""
     },
 
     video: {
