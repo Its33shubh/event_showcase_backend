@@ -12,17 +12,14 @@ export const createEvent = async (req, res) => {
       ...otherFields
     } = req.body;
 
-    // Required field check
     if (!title || !description || !category || !status) {
       return res.status(400).json({
-        error:true,
+        error: true,
         success: false,
         message: "Required fields missing"
-        
       });
     }
 
-    // Date logic
     let eventDate = null;
 
     if (startDate && endDate) {
@@ -33,12 +30,15 @@ export const createEvent = async (req, res) => {
       eventDate = endDate;
     }
 
+    const imageUrl = req.file ? req.file.path : "";
+
     const event = await Event.create({
       title,
       description,
       category,
       status,
       date: eventDate,
+      image: imageUrl,
       ...otherFields
     });
 
@@ -46,7 +46,7 @@ export const createEvent = async (req, res) => {
       error: false,
       success: true,
       message: "Event created successfully",
-      data : event
+      data: event
     });
 
   } catch (error) {
@@ -130,20 +130,79 @@ export const getEventById = async (req, res) => {
 };
 
 export const updateEvent = async (req, res) => {
-  const event = await Event.findByIdAndUpdate(
-    req.params.id,
-    req.body,
-    { new: true }
-  );
+  try {
+    const { id } = req.params;
+    const { startDate, endDate, ...otherFields } = req.body;
 
-  res.json({
-    message: "Event updated",
-    event
-  });
+    let updateData = { ...otherFields };
+
+    // date logic
+    if (startDate && endDate) {
+      updateData.date = `${startDate} to ${endDate}`;
+    } else if (startDate) {
+      updateData.date = startDate;
+    } else if (endDate) {
+      updateData.date = endDate;
+    }
+
+    const event = await Event.findByIdAndUpdate(
+      id,
+      updateData,
+      {
+        new: true,
+        runValidators: true
+      }
+    );
+
+    if (!event) {
+      return res.status(404).json({
+        error: true,
+        success: false,
+        message: "Event not found"
+      });
+    }
+
+    return res.status(200).json({
+      error: false,
+      success: true,
+      message: "Event updated successfully",
+      data: event
+    });
+
+  } catch (error) {
+    return res.status(500).json({
+      error: true,
+      success: false,
+      message: error.message
+    });
+  }
 };
 
 export const deleteEvent = async (req, res) => {
-  await Event.findByIdAndDelete(req.params.id);
+  try {
+    const { id } = req.params;
 
-  res.json({ message: "Event deleted" });
+    const event = await Event.findByIdAndDelete(id);
+
+    if (!event) {
+      return res.status(404).json({
+        error: true,
+        success: false,
+        message: "Event not found"
+      });
+    }
+
+    return res.status(200).json({
+      error: false,
+      success: true,
+      message: "Event deleted successfully"
+    });
+
+  } catch (error) {
+    return res.status(500).json({
+      error: true,
+      success: false,
+      message: error.message
+    });
+  }
 };

@@ -1,5 +1,6 @@
 import express from "express";
 import { authMiddleware } from "../middleware/authMiddleware.js";
+import uploadEventImage from "../middleware/uploadEventImage.js"
 
 
 import {
@@ -15,7 +16,7 @@ import {
 const router = express.Router();
 
 // Admin protected
-router.post("/create", authMiddleware, createEvent);
+router.post("/create", uploadEventImage.single("image"),authMiddleware, createEvent);
 router.put("/update/:id", authMiddleware, updateEvent);
 router.delete("/delete/:id", authMiddleware, deleteEvent);
 
