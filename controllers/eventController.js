@@ -64,30 +64,37 @@ export const getEvents = async (req, res) => {
 
     let query = {};
 
-    // Filter by category
+    // category filter
     if (category) {
-      query.category = category;
+      query.category = { $regex: category, $options: "i" };
     }
 
-    // Filter by status
+    // status filter
     if (status) {
       query.status = status;
     }
 
-    // Search by title
+    // title search
     if (search) {
       query.title = { $regex: search, $options: "i" };
     }
 
-    const events = await Event.find(query);
+    const events = await Event.find(query).sort({ createdAt: -1 });
 
-    res.json(events);
+    return res.status(200).json({
+      error: false,
+      success: true,
+      message: events.length
+        ? "Events fetched successfully"
+        : "No events found",
+      data: events
+    });
 
   } catch (error) {
-    console.log("ERROR:", error);
-    res.status(500).json({
-      message: "Server error",
-      error: error.message
+    return res.status(500).json({
+      error: true,
+      success: false,
+      message: error.message
     });
   }
 };
