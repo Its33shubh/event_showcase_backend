@@ -17,7 +17,7 @@ const router = express.Router();
 
 // Admin protected
 router.post("/create", uploadEventImage.single("image"),authMiddleware, createEvent);
-router.put("/update/:id", authMiddleware, updateEvent);
+router.put("/update/:id", uploadEventImage.single("image"), authMiddleware, updateEvent);
 router.delete("/delete/:id", authMiddleware, deleteEvent);
 
 // Public

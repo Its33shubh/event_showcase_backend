@@ -64,17 +64,14 @@ export const getEvents = async (req, res) => {
 
     let query = {};
 
-    // category filter
     if (category) {
       query.category = { $regex: category, $options: "i" };
     }
 
-    // status filter
     if (status) {
       query.status = status;
     }
 
-    // title search
     if (search) {
       query.title = { $regex: search, $options: "i" };
     }
@@ -84,7 +81,7 @@ export const getEvents = async (req, res) => {
     return res.status(200).json({
       error: false,
       success: true,
-      message: events.length
+      message: events.length > 0
         ? "Events fetched successfully"
         : "No events found",
       data: events
@@ -98,6 +95,7 @@ export const getEvents = async (req, res) => {
     });
   }
 };
+
 
 export const getEventById = async (req, res) => {
   try {
@@ -129,6 +127,7 @@ export const getEventById = async (req, res) => {
   }
 };
 
+
 export const updateEvent = async (req, res) => {
   try {
     const { id } = req.params;
@@ -136,13 +135,18 @@ export const updateEvent = async (req, res) => {
 
     let updateData = { ...otherFields };
 
-    // date logic
+    // date update
     if (startDate && endDate) {
       updateData.date = `${startDate} to ${endDate}`;
     } else if (startDate) {
       updateData.date = startDate;
     } else if (endDate) {
       updateData.date = endDate;
+    }
+
+    // image update
+    if (req.file) {
+      updateData.image = req.file.path;
     }
 
     const event = await Event.findByIdAndUpdate(
@@ -177,6 +181,7 @@ export const updateEvent = async (req, res) => {
     });
   }
 };
+
 
 export const deleteEvent = async (req, res) => {
   try {
