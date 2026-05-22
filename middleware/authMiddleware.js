@@ -17,8 +17,8 @@ export const authAdmin = async (req, res, next) => {
   try {
     const verified = jwt.verify(token, process.env.JWT_SECRET);
 
-    const user = await User.findById(verified.userId);
-
+    const user = await User.findById(verified.id);
+    //    console.log(verified);
     if (!user) {
       return res.status(404).json({
         error: true,
