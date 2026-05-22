@@ -1,5 +1,5 @@
 import express from "express";
-import { authMiddleware } from "../middleware/authMiddleware.js";
+import { authAdmin } from "../middleware/authMiddleware.js";
 import uploadEventImage from "../middleware/uploadEventImage.js"
 
 
@@ -16,9 +16,9 @@ import {
 const router = express.Router();
 
 // Admin protected
-router.post("/create", uploadEventImage.single("image"),authMiddleware, createEvent);
-router.put("/update/:id", uploadEventImage.single("image"), authMiddleware, updateEvent);
-router.delete("/delete/:id", authMiddleware, deleteEvent);
+router.post("/create",authAdmin, uploadEventImage.single("image"), createEvent);
+router.put("/update/:id", authAdmin,uploadEventImage.single("image"), updateEvent);
+router.delete("/delete/:id", authAdmin, deleteEvent);
 
 // Public
 router.get("/get", getEvents);

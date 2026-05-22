@@ -1,13 +1,14 @@
 import jwt from "jsonwebtoken";
+import User from "../models/User.js";
 
-export const authMiddleware = (req, res, next) => {
+export const authAdmin = async (req, res, next) => {
   const header = req.header("Authorization");
 
   if (!header) {
-    return res.status(401).json({ 
-      error:true,
-      success:false,
-      message: "No token , Access denied" 
+    return res.status(401).json({
+      error: true,
+      success: false,
+      message: "No token, Access denied"
     });
   }
 
@@ -15,13 +16,33 @@ export const authMiddleware = (req, res, next) => {
 
   try {
     const verified = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = verified;
+
+    const user = await User.findById(verified.userId);
+
+    if (!user) {
+      return res.status(404).json({
+        error: true,
+        success: false,
+        message: "User not found"
+      });
+    }
+
+    if (user.role !== "admin") {
+      return res.status(403).json({
+        error: true,
+        success: false,
+        message: "Admin access only"
+      });
+    }
+
+    req.user = user;
     next();
+
   } catch (error) {
-    res.status(400).json({ 
-      error:true,
-      success:false,
-      message: "Invalid token" 
+    return res.status(400).json({
+      error: true,
+      success: false,
+      message: "Invalid token"
     });
   }
 };
