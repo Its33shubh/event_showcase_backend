@@ -1,4 +1,5 @@
 import User from "../models/User.js";
+import Event from "../models/Event.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
@@ -145,4 +146,41 @@ export const getAdminProfile = async (req, res) => {
         message: error.message
       });
     }
+};
+
+export const getDashboardStats = async (req, res) => {
+  try {
+    const totalEvents = await Event.countDocuments();
+
+    const upcomingEvents = await Event.countDocuments({
+      status: "Upcoming"
+    });
+
+    const ongoingEvents = await Event.countDocuments({
+      status: "Ongoing"
+    });
+
+    const completedEvents = await Event.countDocuments({
+      status: "Completed"
+    });
+
+    return res.status(200).json({
+      error: false,
+      success: true,
+      message: "Dashboard stats fetched successfully",
+      data: {
+        totalEvents,
+        upcomingEvents,
+        ongoingEvents,
+        completedEvents
+      }
+    });
+
+  } catch (error) {
+    return res.status(500).json({
+      error: true,
+      success: false,
+      message: error.message
+    });
+  }
 };
