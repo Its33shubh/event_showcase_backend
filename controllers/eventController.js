@@ -1,4 +1,5 @@
 import Event from "../models/Event.js";
+import cloudinary, { getPublicIdFromUrl } from "../config/cloudinary.js";
 
 export const createEvent = async (req, res) => {
   try {
@@ -133,9 +134,18 @@ export const updateEvent = async (req, res) => {
     const { id } = req.params;
     const { startDate, endDate, ...otherFields } = req.body;
 
+    const existingEvent = await Event.findById(id);
+
+    if (!existingEvent) {
+      return res.status(404).json({
+        error: true,
+        success: false,
+        message: "Event not found"
+      });
+    }
+
     let updateData = { ...otherFields };
 
-    // date update
     if (startDate && endDate) {
       updateData.date = `${startDate} to ${endDate}`;
     } else if (startDate) {
@@ -144,8 +154,15 @@ export const updateEvent = async (req, res) => {
       updateData.date = endDate;
     }
 
-    // image update
     if (req.file) {
+      if (existingEvent.image) {
+        const publicId = getPublicIdFromUrl(existingEvent.image);
+
+        if (publicId) {
+          await cloudinary.uploader.destroy(publicId);
+        }
+      }
+
       updateData.image = req.file.path;
     }
 
@@ -157,14 +174,6 @@ export const updateEvent = async (req, res) => {
         runValidators: true
       }
     );
-
-    if (!event) {
-      return res.status(404).json({
-        error: true,
-        success: false,
-        message: "Event not found"
-      });
-    }
 
     return res.status(200).json({
       error: false,
