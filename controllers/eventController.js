@@ -128,7 +128,6 @@ export const getEventById = async (req, res) => {
   }
 };
 
-
 export const updateEvent = async (req, res) => {
   try {
     const { id } = req.params;
@@ -196,7 +195,7 @@ export const deleteEvent = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const event = await Event.findByIdAndDelete(id);
+    const event = await Event.findById(id);
 
     if (!event) {
       return res.status(404).json({
@@ -205,6 +204,16 @@ export const deleteEvent = async (req, res) => {
         message: "Event not found"
       });
     }
+
+    if (event.image) {
+      const publicId = getPublicIdFromUrl(event.image);
+
+      if (publicId) {
+        await cloudinary.uploader.destroy(publicId);
+      }
+    }
+
+    await Event.findByIdAndDelete(id);
 
     return res.status(200).json({
       error: false,
